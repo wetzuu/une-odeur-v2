@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function Navbar({ searchTerm, onSearchChange }) {
+  const { user } = useAuth()
+
   return (
     <header className="navbar">
       <Link to="/" className="navbar-brand">
@@ -12,7 +15,7 @@ export default function Navbar({ searchTerm, onSearchChange }) {
         <Link to="/" className="nav-btn">Home</Link>
         <Link to="/about" className="nav-btn">About</Link>
         <Link to="/category" className="nav-btn">Category</Link>
-        <Link to="/account" className="nav-btn">Login</Link>
+        <Link to="/account" className="nav-btn">{user ? 'Account' : 'Login'}</Link>
       </nav>
 
       <div className="nav-right">

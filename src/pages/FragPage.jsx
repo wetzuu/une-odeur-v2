@@ -1,9 +1,39 @@
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import fragrances from '../data/fragrances'
+import { getFragrance } from '../lib/fragranceService'
 
 export default function FragPage() {
   const { id } = useParams()
-  const frag = fragrances.find((f) => f.id === id)
+  const [frag, setFrag] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+    setLoading(true)
+
+    getFragrance(id)
+      .then((data) => {
+        if (isMounted) setFrag(data)
+      })
+      .catch(() => {
+        if (isMounted) setFrag(null)
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="not-found">
+        <h2 style={{ color: 'var(--wf-bg2)' }}>Loading…</h2>
+      </div>
+    )
+  }
 
   if (!frag) {
     return (

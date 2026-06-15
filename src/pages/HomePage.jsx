@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
-import fragrances from '../data/fragrances'
+import { getFragrances } from '../lib/fragranceService'
 
 const recommendations = [
   {
@@ -30,6 +31,29 @@ function normalizeSearchValue(value) {
 }
 
 export default function HomePage({ searchTerm = '' }) {
+  const [fragrances, setFragrances] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    getFragrances()
+      .then((data) => {
+        if (isMounted) setFragrances(data)
+      })
+      .catch((err) => {
+        if (isMounted) setError(err.message)
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const normalizedSearchTerm = normalizeSearchValue(searchTerm)
   const visibleFragrances = normalizedSearchTerm
     ? fragrances.filter((frag) => {
@@ -52,7 +76,11 @@ export default function HomePage({ searchTerm = '' }) {
       <section className="content-area">
         <h3 className="section-title">Sum Fragrances</h3>
         <div className="fragrance-grid">
-          {visibleFragrances.length > 0 ? (
+          {loading ? (
+            <p className="search-empty-state">Loading fragrances…</p>
+          ) : error ? (
+            <p className="search-empty-state">Couldn't load fragrances: {error}</p>
+          ) : visibleFragrances.length > 0 ? (
             visibleFragrances.map((frag) => (
               <PerfumeCard key={frag.id} frag={frag} />
             ))

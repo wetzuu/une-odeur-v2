@@ -627,6 +627,24 @@ a {
   transform: translateY(-1px);
 }
 
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.form-error {
+  color: #e0556f;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.form-message {
+  color: var(--wf-bg2);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
 /* ── Footer ────────────────────────────────── */
 .footer {
   text-align: center;

@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
-import fragrances from '../data/fragrances'
+import { getFragrances } from '../lib/fragranceService'
 
 const categoryOptions = [
 	'All',
@@ -17,14 +17,36 @@ const categoryOptions = [
 	'Musk',
 ]
 
-const brandOptions = [
-	'All brands',
-	...new Set(fragrances.map((frag) => frag.brand)),
-]
-
 export default function CategoryPage() {
+	const [fragrances, setFragrances] = useState([])
+	const [loading, setLoading] = useState(true)
+	const [error, setError] = useState(null)
 	const [activeCategory, setActiveCategory] = useState('All')
 	const [activeBrand, setActiveBrand] = useState('All brands')
+
+	useEffect(() => {
+		let isMounted = true
+
+		getFragrances()
+			.then((data) => {
+				if (isMounted) setFragrances(data)
+			})
+			.catch((err) => {
+				if (isMounted) setError(err.message)
+			})
+			.finally(() => {
+				if (isMounted) setLoading(false)
+			})
+
+		return () => {
+			isMounted = false
+		}
+	}, [])
+
+	const brandOptions = useMemo(
+		() => ['All brands', ...new Set(fragrances.map((frag) => frag.brand))],
+		[fragrances]
+	)
 
 	const visibleFragrances = useMemo(() => {
 		return fragrances.filter((frag) => {
@@ -36,7 +58,7 @@ export default function CategoryPage() {
 
 			return matchesCategory && matchesBrand
 		})
-	}, [activeCategory, activeBrand])
+	}, [fragrances, activeCategory, activeBrand])
 
 	return (
 		<div className="category-page">
@@ -85,7 +107,11 @@ export default function CategoryPage() {
 				</div>
 
 				<div className="fragrance-grid category-grid">
-					{visibleFragrances.length > 0 ? (
+					{loading ? (
+						<p className="search-empty-state">Loading fragrances…</p>
+					) : error ? (
+						<p className="search-empty-state">Couldn't load fragrances: {error}</p>
+					) : visibleFragrances.length > 0 ? (
 						visibleFragrances.map((frag) => <PerfumeCard key={frag.id} frag={frag} />)
 					) : (
 						<p className="search-empty-state">No fragrances match this combination.</p>
