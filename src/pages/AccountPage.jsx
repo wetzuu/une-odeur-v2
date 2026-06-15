@@ -50,6 +50,10 @@ export default function AccountPage() {
               <label>Password</label>
               <input type="password" placeholder="••••••••" />
             </div>
+            <div className="form-group">
+              <label>Confirm Password</label>
+              <input type="password" placeholder="••••••••" />
+            </div>
             <button type="submit" className="submit-btn">Create Account</button>
           </form>
         )}
