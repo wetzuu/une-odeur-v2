@@ -6,6 +6,8 @@ import HomePage from './pages/HomePage'
 import FragPage from './pages/FragPage'
 import CategoryPage from './pages/CategoryPage'
 import AccountPage from './pages/AccountPage'
+import AboutPage from './pages/AboutPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -13,12 +15,16 @@ export default function App() {
   return (
     <div className="app">
       <Navbar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-      <Routes>
-        <Route path="/" element={<HomePage searchTerm={searchTerm} />} />
-        <Route path="/category" element={<CategoryPage />} />
-        <Route path="/frags/:id" element={<FragPage />} />
-        <Route path="/account" element={<AccountPage />} />
-      </Routes>
+      <main className="shop-main">
+        <Routes>
+          <Route path="/" element={<HomePage searchTerm={searchTerm} />} />
+          <Route path="/category" element={<CategoryPage />} />
+          <Route path="/frags/:id" element={<FragPage />} />
+          <Route path="/account" element={<AccountPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
       <Footer />
     </div>
   )

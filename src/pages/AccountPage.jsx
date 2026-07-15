@@ -60,12 +60,27 @@ export default function AccountPage() {
 
   if (user) {
     return (
-      <div className="account-page">
-        <div className="account-card">
-          <h2>une 'odeur</h2>
-          <p className="subtitle">Signed in as {user.email}</p>
+      <div className="member-page">
+        <div className="member-card">
+          <header className="member-card-head">
+            <span className="member-card-title">une ’odeur</span>
+            <span className="member-card-sub">MEMBER CARD</span>
+          </header>
+          <p className="member-note">Welcome back to the shop.</p>
+
+          <div className="member-rows">
+            <div className="receipt-row">
+              <span>MEMBER</span>
+              <span>{user.email}</span>
+            </div>
+            <div className="receipt-row">
+              <span>STATUS</span>
+              <span>SIGNED IN ✓</span>
+            </div>
+          </div>
+
           <button type="button" className="submit-btn" onClick={handleLogout}>
-            Log out
+            Sign out
           </button>
         </div>
       </div>
@@ -73,10 +88,13 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="account-page">
-      <div className="account-card">
-        <h2>une 'odeur</h2>
-        <p className="subtitle">Sign in to your account or create one.</p>
+    <div className="member-page">
+      <div className="member-card">
+        <header className="member-card-head">
+          <span className="member-card-title">une ’odeur</span>
+          <span className="member-card-sub">MEMBER CARD</span>
+        </header>
+        <p className="member-note">Sign in to the shop, or get your card stamped for the first time.</p>
 
         <div className="tabs">
           <button
@@ -87,7 +105,7 @@ export default function AccountPage() {
               setMessage(null)
             }}
           >
-            Login
+            Sign In
           </button>
           <button
             className={`tab-btn ${tab === 'signup' ? 'active' : ''}`}
@@ -97,7 +115,7 @@ export default function AccountPage() {
               setMessage(null)
             }}
           >
-            Sign Up
+            New Member
           </button>
         </div>
 
@@ -127,7 +145,7 @@ export default function AccountPage() {
               />
             </div>
             <button type="submit" className="submit-btn" disabled={submitting}>
-              {submitting ? 'Logging in…' : 'Login'}
+              {submitting ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
         ) : (
@@ -173,7 +191,7 @@ export default function AccountPage() {
               />
             </div>
             <button type="submit" className="submit-btn" disabled={submitting}>
-              {submitting ? 'Creating account…' : 'Create Account'}
+              {submitting ? 'Stamping your card…' : 'Become a Member'}
             </button>
           </form>
         )}

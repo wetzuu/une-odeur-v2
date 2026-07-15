@@ -1,28 +1,25 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
+import ShelfSection from '../components/ShelfSection'
 import { getFragrances } from '../lib/fragranceService'
+import { SCENT_FAMILIES } from '../lib/catalog'
 
-const categoryOptions = [
-	'All',
-	'Fresh',
-	'Woody',
-	'Floral',
-	'Amber',
-	'Sweet',
-	'Spicy',
-	'Citrus',
-	'Fruity',
-	'Gourmand',
-	'Musk',
-]
+const categoryOptions = ['All', ...SCENT_FAMILIES]
 
 export default function CategoryPage() {
 	const [fragrances, setFragrances] = useState([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
-	const [activeCategory, setActiveCategory] = useState('All')
 	const [activeBrand, setActiveBrand] = useState('All brands')
+	const [searchParams, setSearchParams] = useSearchParams()
+
+	const familyParam = searchParams.get('family')
+	const activeCategory = categoryOptions.includes(familyParam) ? familyParam : 'All'
+
+	function setActiveCategory(category) {
+		setSearchParams(category === 'All' ? {} : { family: category })
+	}
 
 	useEffect(() => {
 		let isMounted = true
@@ -52,7 +49,7 @@ export default function CategoryPage() {
 		return fragrances.filter((frag) => {
 			const matchesCategory =
 				activeCategory === 'All' ||
-				frag.tags.some((tag) => tag.toLowerCase() === activeCategory.toLowerCase())
+				(frag.tags ?? []).some((tag) => tag.toLowerCase() === activeCategory.toLowerCase())
 
 			const matchesBrand = activeBrand === 'All brands' || frag.brand === activeBrand
 
@@ -60,33 +57,45 @@ export default function CategoryPage() {
 		})
 	}, [fragrances, activeCategory, activeBrand])
 
-	return (
-		<div className="category-page">
-			<section className="category-hero">
-				<div>
-					<p className="category-kicker">Browse by category</p>
-					<h1>Choose a scent family to filter through.</h1>
-					<p className="category-copy">
-						Use da buttons to filter out which scent family you wanna see, and use dropdown box to filter by brand.
-					</p>
-				</div>
+	// Each brand gets its own run of shelving, like walking a stocked aisle.
+	const brandShelves = useMemo(() => {
+		const shelves = new Map()
+		for (const frag of visibleFragrances) {
+			if (!shelves.has(frag.brand)) shelves.set(frag.brand, [])
+			shelves.get(frag.brand).push(frag)
+		}
+		return [...shelves.entries()]
+	}, [visibleFragrances])
 
-				<div className="category-controls">
-					<div className="category-pills">
-						{categoryOptions.map((category) => (
+	return (
+		<div className="aisles-page">
+			<section className="aisles-hero">
+				<p className="aisles-kicker">Walk the aisles</p>
+				<h1>Every shelf is sorted by scent family.</h1>
+				<p className="aisles-copy">
+					Pick a family from the labels below, or browse a single brand's shelf.
+					Take your time — nobody's waiting behind you.
+				</p>
+
+				<div className="aisles-controls">
+					<div className="aisle-pills" role="group" aria-label="Scent families">
+						{categoryOptions.map((category, index) => (
 							<button
 								key={category}
 								type="button"
-								className={`category-pill ${activeCategory === category ? 'active' : ''}`}
+								className={`shelf-label ${activeCategory === category ? 'active' : ''}`}
 								onClick={() => setActiveCategory(category)}
 							>
+								{category !== 'All' && (
+									<span className="family-index">{String(index).padStart(2, '0')}</span>
+								)}
 								{category}
 							</button>
 						))}
 					</div>
 
-					<label className="category-select-wrap">
-						<span>Brand</span>
+					<label className="brand-select-wrap">
+						<span>Brand shelf</span>
 						<select value={activeBrand} onChange={(event) => setActiveBrand(event.target.value)}>
 							{brandOptions.map((brand) => (
 								<option key={brand} value={brand}>
@@ -98,26 +107,39 @@ export default function CategoryPage() {
 				</div>
 			</section>
 
-			<section className="category-results">
-				<div className="category-results-header">
-					<h2>{activeCategory === 'All' ? 'All Fragrances' : activeCategory}</h2>
-					<Link to="/" className="category-back-link">
-						Back to home
-					</Link>
-				</div>
+			{loading ? (
+				<p className="print-note">PRINTING THE SHELVES…</p>
+			) : error ? (
+				<p className="print-note">COULDN'T STOCK THE SHELVES: {error}</p>
+			) : (
+				<>
+					<p className="aisles-count">
+						{visibleFragrances.length} {visibleFragrances.length === 1 ? 'ITEM' : 'ITEMS'} ON THE
+						SHELF
+						{activeCategory !== 'All' && ` · FAMILY: ${activeCategory.toUpperCase()}`}
+						{activeBrand !== 'All brands' && ` · BRAND: ${activeBrand.toUpperCase()}`}
+					</p>
 
-				<div className="fragrance-grid category-grid">
-					{loading ? (
-						<p className="search-empty-state">Loading fragrances…</p>
-					) : error ? (
-						<p className="search-empty-state">Couldn't load fragrances: {error}</p>
-					) : visibleFragrances.length > 0 ? (
-						visibleFragrances.map((frag) => <PerfumeCard key={frag.id} frag={frag} />)
+					{brandShelves.length > 0 ? (
+						brandShelves.map(([brand, frags]) => (
+							<div key={brand} className="brand-shelf">
+								<ShelfSection
+									title={brand}
+									note={`${frags.length} ${frags.length === 1 ? 'ITEM' : 'ITEMS'}`}
+								>
+									<div className="shelf-grid">
+										{frags.map((frag) => (
+											<PerfumeCard key={frag.id} frag={frag} />
+										))}
+									</div>
+								</ShelfSection>
+							</div>
+						))
 					) : (
-						<p className="search-empty-state">No fragrances match this combination.</p>
+						<p className="print-note">THIS SHELF IS EMPTY — TRY ANOTHER COMBINATION</p>
 					)}
-				</div>
-			</section>
+				</>
+			)}
 		</div>
 	)
 }

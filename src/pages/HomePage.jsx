@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
+import ShelfSection from '../components/ShelfSection'
 import { getFragrances } from '../lib/fragranceService'
+import { SCENT_FAMILIES } from '../lib/catalog'
 
-const recommendations = [
+const neighborhoodPicks = [
   {
     name: 'Enzo Scents',
     desc: 'Well-performing fragrances of decent quality on a budget.',
@@ -55,51 +57,105 @@ export default function HomePage({ searchTerm = '' }) {
   }, [])
 
   const normalizedSearchTerm = normalizeSearchValue(searchTerm)
-  const visibleFragrances = normalizedSearchTerm
+  const isSearching = normalizedSearchTerm.length > 0
+
+  const matches = isSearching
     ? fragrances.filter((frag) => {
         const searchableText = [frag.name, frag.brand, ...(frag.tags ?? [])].join(' ').toLowerCase()
         return searchableText.includes(normalizedSearchTerm)
       })
     : fragrances
 
-  return (
-    <div className="main-container">
-      <Link to="/" className="hero-banner">
-        <div className="hero-content">
-          <h2 style={{ color: 'white', fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif" }}>une' odeur</h2>
-          <p style={{ color: 'white', fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif", fontStyle: 'italic' }}>[feminine] /ɔdœʀ/</p>
-          <p style={{ color: 'white', fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif", fontStyle: 'italic' }}>&bull; transitive website</p>
-          <p style={{ color: 'white', fontFamily: "'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif" }}>a site focused on fragrance discovery and reviews of local and international fragrances.</p>
-        </div>
-      </Link>
+  // getFragrances() already orders by created_at desc — the front
+  // of the list is what's newest on the shelves.
+  const newArrivals = fragrances.slice(0, 4)
+  const restOfShelves = fragrances.slice(4)
 
-      <section className="content-area">
-        <h3 className="section-title">Sum Fragrances</h3>
-        <div className="fragrance-grid">
-          {loading ? (
-            <p className="search-empty-state">Loading fragrances…</p>
-          ) : error ? (
-            <p className="search-empty-state">Couldn't load fragrances: {error}</p>
-          ) : visibleFragrances.length > 0 ? (
-            visibleFragrances.map((frag) => (
-              <PerfumeCard key={frag.id} frag={frag} />
-            ))
-          ) : (
-            <p className="search-empty-state">No fragrances match "{searchTerm}".</p>
-          )}
-        </div>
+  return (
+    <div className="shop-floor">
+      <section className="shopfront">
+        <h1>une ’odeur</h1>
+        <p className="shopfront-phonetic">[feminine] · /ɔdœʀ/</p>
+        <p className="shopfront-tagline">
+          A neighborhood fragrance archive — local and international scents,
+          shelved with care and reviewed over the counter.
+        </p>
+        <p className="shopfront-hours">— OPEN DAILY · FREE TO BROWSE · EST. 2026 —</p>
       </section>
 
-      <aside className="sidebar">
-        <h3 className="section-title">Sum Recommendations</h3>
-        {recommendations.map((rec) => (
-          <div key={rec.name} className="recommendation-item">
-            <a href={rec.url} target="_blank" rel="noreferrer">
-              <p className="rec-name">{rec.name}</p>
-              <p className="rec-desc">{rec.desc}</p>
+      <div className="shop-floor-main">
+        {loading ? (
+          <p className="print-note">PRINTING THE SHELVES…</p>
+        ) : error ? (
+          <p className="print-note">COULDN'T STOCK THE SHELVES: {error}</p>
+        ) : isSearching ? (
+          <section className="shelf-section">
+            <div className="lookup-slip">
+              LOOKUP: "{searchTerm.trim().toUpperCase()}" — {matches.length}{' '}
+              {matches.length === 1 ? 'ITEM' : 'ITEMS'} FOUND
+            </div>
+            {matches.length > 0 ? (
+              <div className="shelf-grid">
+                {matches.map((frag) => (
+                  <PerfumeCard key={frag.id} frag={frag} />
+                ))}
+              </div>
+            ) : (
+              <p className="print-note">
+                NOTHING ON THE SHELVES MATCHES — TRY <Link to="/category">WALKING THE AISLES</Link>
+              </p>
+            )}
+          </section>
+        ) : (
+          <>
+            <ShelfSection number={1} title="New Arrivals" note="FRESHLY STOCKED">
+              <div className="shelf-grid">
+                {newArrivals.map((frag) => (
+                  <PerfumeCard key={frag.id} frag={frag} />
+                ))}
+              </div>
+            </ShelfSection>
+
+            {restOfShelves.length > 0 && (
+              <ShelfSection number={2} title="On the Shelves" note="THE STANDING COLLECTION">
+                <div className="shelf-grid">
+                  {restOfShelves.map((frag) => (
+                    <PerfumeCard key={frag.id} frag={frag} />
+                  ))}
+                </div>
+              </ShelfSection>
+            )}
+
+            <ShelfSection title="Browse by Scent Family" note="FIND YOUR AISLE">
+              <div className="family-rack">
+                {SCENT_FAMILIES.map((family, index) => (
+                  <Link
+                    key={family}
+                    to={`/category?family=${encodeURIComponent(family)}`}
+                    className="shelf-label family-label"
+                  >
+                    <span className="family-index">{String(index + 1).padStart(2, '0')}</span>
+                    {family}
+                  </Link>
+                ))}
+              </div>
+            </ShelfSection>
+          </>
+        )}
+      </div>
+
+      <aside className="community-board" aria-label="Neighborhood picks">
+        <h3 className="board-title">the community board</h3>
+        <p className="board-sub">Shops the neighborhood swears by</p>
+        <div className="board-frame">
+          {neighborhoodPicks.map((pick) => (
+            <a key={pick.name} className="pin-note" href={pick.url} target="_blank" rel="noreferrer">
+              <p className="pin-note-name">{pick.name}</p>
+              <p className="pin-note-desc">{pick.desc}</p>
+              <span className="pin-note-link">shopee.ph ↗</span>
             </a>
-          </div>
-        ))}
+          ))}
+        </div>
       </aside>
     </div>
   )
