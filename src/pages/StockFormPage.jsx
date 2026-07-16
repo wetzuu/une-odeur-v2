@@ -3,15 +3,17 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import FragranceForm from '../components/FragranceForm'
 import { addFragrance, getFragrance, updateFragrance } from '../lib/fragranceService'
 import { inventoryNumber, slugify } from '../lib/catalog'
+import { canEditFragrances } from '../lib/permissions'
+import { useAuth } from '../context/AuthContext'
 
-// NOTE: catalog management is intentionally open to every visitor at this
-// stage. When authentication/ownership lands, gate this page and the
-// stockroom strip on FragPage — the data calls in fragranceService and
-// the form itself won't need to change.
+// NOTE: stocking new items is open to every visitor; editing existing
+// items is admin-only (see src/lib/permissions.js — the RLS policies in
+// supabase/admin-delete.sql are the real gate).
 export default function StockFormPage() {
   const { id } = useParams()
   const isEdit = Boolean(id)
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
 
   const [initial, setInitial] = useState(null)
   const [loading, setLoading] = useState(isEdit)
@@ -78,10 +80,32 @@ export default function StockFormPage() {
     }
   }
 
-  if (loading) {
+  if (loading || (isEdit && authLoading)) {
     return (
       <div className="void-slip">
         <p className="print-note">PULLING THE PAPERWORK…</p>
+      </div>
+    )
+  }
+
+  if (isEdit && !canEditFragrances(user)) {
+    return (
+      <div className="void-slip">
+        <div className="receipt-wrap">
+          <div className="receipt">
+            <p className="receipt-shop">UNE ’ODEUR</p>
+            <div className="receipt-rule" />
+            <p className="receipt-sub">403 — STAFF ONLY BEYOND THIS POINT</p>
+            <p className="receipt-sub">EDITING SHELVED ITEMS IS RESERVED FOR SHOP ADMINISTRATORS</p>
+            <div>
+              <span className="void-stamp">STAFF ONLY</span>
+            </div>
+            <div className="receipt-rule" />
+            <p className="receipt-sub">
+              <Link to={`/frags/${id}`}>← BACK TO THE ITEM</Link>
+            </p>
+          </div>
+        </div>
       </div>
     )
   }

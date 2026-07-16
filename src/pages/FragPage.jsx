@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getFragrance, deleteFragrance } from '../lib/fragranceService'
 import { getRatingSummary, addRating } from '../lib/ratingService'
 import { inventoryNumber, shelfLocation, stockDate } from '../lib/catalog'
+import { canDeleteFragrances, canEditFragrances } from '../lib/permissions'
+import { useAuth } from '../context/AuthContext'
 
 // Fake-but-deterministic barcode: bar widths derived from the item id.
 function Barcode({ id }) {
@@ -30,6 +32,7 @@ function Barcode({ id }) {
 export default function FragPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [frag, setFrag] = useState(null)
   const [loading, setLoading] = useState(true)
   const [confirmingRemove, setConfirmingRemove] = useState(false)
@@ -206,39 +209,44 @@ export default function FragPage() {
               {ratingError && <p className="form-error">COULDN'T LOG RATING: {ratingError}</p>}
             </div>
 
+            {(canEditFragrances(user) || canDeleteFragrances(user)) && (
             <div className="stockroom-strip">
               <span className="stockroom-tag">STOCKROOM</span>
-              <Link to={`/stockroom/${frag.id}/edit`} className="stockroom-link">✎ EDIT ITEM</Link>
-              {confirmingRemove ? (
-                <>
-                  <span className="stockroom-tag">TAKE IT OFF THE SHELF?</span>
+              {canEditFragrances(user) && (
+                <Link to={`/stockroom/${frag.id}/edit`} className="stockroom-link">✎ EDIT ITEM</Link>
+              )}
+              {canDeleteFragrances(user) &&
+                (confirmingRemove ? (
+                  <>
+                    <span className="stockroom-tag">TAKE IT OFF THE SHELF?</span>
+                    <button
+                      type="button"
+                      className="stockroom-link danger"
+                      onClick={handleRemove}
+                      disabled={removing}
+                    >
+                      {removing ? 'REMOVING…' : 'YES, REMOVE'}
+                    </button>
+                    <button
+                      type="button"
+                      className="stockroom-link"
+                      onClick={() => setConfirmingRemove(false)}
+                      disabled={removing}
+                    >
+                      KEEP IT
+                    </button>
+                  </>
+                ) : (
                   <button
                     type="button"
                     className="stockroom-link danger"
-                    onClick={handleRemove}
-                    disabled={removing}
+                    onClick={() => setConfirmingRemove(true)}
                   >
-                    {removing ? 'REMOVING…' : 'YES, REMOVE'}
+                    ✕ REMOVE FROM SHELF
                   </button>
-                  <button
-                    type="button"
-                    className="stockroom-link"
-                    onClick={() => setConfirmingRemove(false)}
-                    disabled={removing}
-                  >
-                    KEEP IT
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  className="stockroom-link danger"
-                  onClick={() => setConfirmingRemove(true)}
-                >
-                  ✕ REMOVE FROM SHELF
-                </button>
-              )}
+                ))}
             </div>
+            )}
             {removeError && <p className="form-error">COULDN'T REMOVE: {removeError}</p>}
           </div>
         </div>

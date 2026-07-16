@@ -1,3 +1,6 @@
+-- ⚠ SUPERSEDED by admin-delete.sql — run that instead. It keeps
+-- insert/update open to everyone but restricts delete to admins.
+--
 -- Stage: open catalog management (no auth yet).
 -- Run this in the Supabase SQL editor AFTER schema.sql.
 --

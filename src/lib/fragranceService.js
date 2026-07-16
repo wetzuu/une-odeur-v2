@@ -32,23 +32,37 @@ export async function addFragrance(fragrance) {
   return data
 }
 
-// UPDATE
+// UPDATE — admin-only, enforced by RLS (supabase/admin-delete.sql).
 export async function updateFragrance(id, updates) {
   const { data, error } = await supabase
     .from('fragrances')
     .update(updates)
     .eq('id', id)
     .select()
-    .single()
   if (error) throw error
-  return data
+  // RLS filters forbidden updates silently (zero rows, no error) —
+  // surface that as an authorization error instead of a false success.
+  if (!data || data.length === 0) {
+    const forbidden = new Error('403 Forbidden — only shop administrators can edit items.')
+    forbidden.status = 403
+    throw forbidden
+  }
+  return data[0]
 }
 
-// DELETE
+// DELETE — admin-only, enforced by RLS (supabase/admin-delete.sql).
 export async function deleteFragrance(id) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('fragrances')
     .delete()
     .eq('id', id)
+    .select()
   if (error) throw error
+  // RLS filters forbidden deletes silently (zero rows, no error) —
+  // surface that as an authorization error instead of a false success.
+  if (!data || data.length === 0) {
+    const forbidden = new Error('403 Forbidden — only shop administrators can remove items.')
+    forbidden.status = 403
+    throw forbidden
+  }
 }
