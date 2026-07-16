@@ -3,12 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
 import ShelfSection from '../components/ShelfSection'
 import { getFragrances } from '../lib/fragranceService'
+import { getRatingSummaries } from '../lib/ratingService'
 import { SCENT_FAMILIES } from '../lib/catalog'
 
 const categoryOptions = ['All', ...SCENT_FAMILIES]
 
 export default function CategoryPage() {
 	const [fragrances, setFragrances] = useState([])
+	const [ratings, setRatings] = useState({})
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
 	const [activeBrand, setActiveBrand] = useState('All brands')
@@ -24,9 +26,13 @@ export default function CategoryPage() {
 	useEffect(() => {
 		let isMounted = true
 
-		getFragrances()
-			.then((data) => {
-				if (isMounted) setFragrances(data)
+		// Ratings fail soft — the shelves still render without them.
+		Promise.all([getFragrances(), getRatingSummaries().catch(() => ({}))])
+			.then(([data, summaries]) => {
+				if (isMounted) {
+					setFragrances(data)
+					setRatings(summaries)
+				}
 			})
 			.catch((err) => {
 				if (isMounted) setError(err.message)
@@ -129,7 +135,7 @@ export default function CategoryPage() {
 								>
 									<div className="shelf-grid">
 										{frags.map((frag) => (
-											<PerfumeCard key={frag.id} frag={frag} />
+											<PerfumeCard key={frag.id} frag={frag} rating={ratings[frag.id]} />
 										))}
 									</div>
 								</ShelfSection>

@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import { aisleFor, inventoryNumber } from '../lib/catalog'
 
-export default function PerfumeCard({ frag }) {
+export default function PerfumeCard({ frag, rating }) {
   const aisle = aisleFor(frag.tags ?? [])
+  const shelver = frag.shelfed_by?.trim() || 'the shop'
 
   return (
     <Link to={`/frags/${frag.id}`} className="shelf-card">
@@ -15,6 +16,14 @@ export default function PerfumeCard({ frag }) {
         <div className="shelf-card-meta">
           <span className="shelf-card-family">{aisle.label}</span>
           <span className="shelf-card-no">Nº {inventoryNumber(frag.id)}</span>
+        </div>
+        <div className="shelf-card-foot">
+          {rating ? (
+            <span className="shelf-card-stars">★ {rating.average.toFixed(1)} ({rating.count})</span>
+          ) : (
+            <span className="shelf-card-unrated">☆ NOT RATED</span>
+          )}
+          <span className="shelf-card-shelver">SHELFED BY {shelver.toUpperCase()}</span>
         </div>
       </div>
     </Link>

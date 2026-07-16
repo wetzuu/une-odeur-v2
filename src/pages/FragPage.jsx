@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getFragrance, deleteFragrance } from '../lib/fragranceService'
+import { getRatingSummary, addRating } from '../lib/ratingService'
 import { inventoryNumber, shelfLocation, stockDate } from '../lib/catalog'
 
 // Fake-but-deterministic barcode: bar widths derived from the item id.
@@ -34,6 +35,12 @@ export default function FragPage() {
   const [confirmingRemove, setConfirmingRemove] = useState(false)
   const [removing, setRemoving] = useState(false)
   const [removeError, setRemoveError] = useState(null)
+  const [ratingSummary, setRatingSummary] = useState(null)
+  const [hoverStar, setHoverStar] = useState(0)
+  const [myRating, setMyRating] = useState(0)
+  const [ratingBusy, setRatingBusy] = useState(false)
+  const [ratingDone, setRatingDone] = useState(false)
+  const [ratingError, setRatingError] = useState(null)
 
   useEffect(() => {
     let isMounted = true
@@ -49,6 +56,26 @@ export default function FragPage() {
       .finally(() => {
         if (isMounted) setLoading(false)
       })
+
+    return () => {
+      isMounted = false
+    }
+  }, [id])
+
+  useEffect(() => {
+    let isMounted = true
+
+    setRatingSummary(null)
+    setMyRating(0)
+    setRatingDone(false)
+    setRatingError(null)
+
+    // Fails soft — the page still renders without a rating summary.
+    getRatingSummary(id)
+      .then((summary) => {
+        if (isMounted) setRatingSummary(summary)
+      })
+      .catch(() => {})
 
     return () => {
       isMounted = false
@@ -85,6 +112,26 @@ export default function FragPage() {
   }
 
   const tags = frag.tags ?? []
+
+  // Anyone can rate for now; one submission per page view as a courtesy.
+  // Upgrades to one-rating-per-user once auth lands (see ratingService).
+  async function handleRate(value) {
+    if (ratingDone || ratingBusy) return
+    setRatingBusy(true)
+    setRatingError(null)
+    setMyRating(value)
+    try {
+      await addRating(frag.id, value)
+      setRatingDone(true)
+      const fresh = await getRatingSummary(frag.id).catch(() => null)
+      if (fresh) setRatingSummary(fresh)
+    } catch (error) {
+      setRatingError(error.message)
+      setMyRating(0)
+    } finally {
+      setRatingBusy(false)
+    }
+  }
 
   // Open to all visitors for now — gate this strip once auth/ownership lands.
   async function handleRemove() {
@@ -125,6 +172,39 @@ export default function FragPage() {
 
             <h2 className="counter-note-label">from the counter —</h2>
             <p className="item-description">{frag.description}</p>
+
+            <div className="counter-rating">
+              <h2 className="counter-note-label">rate it over the counter —</h2>
+              <div className="rating-row">
+                <div
+                  className="star-input"
+                  role="group"
+                  aria-label="Rate this fragrance"
+                  onMouseLeave={() => setHoverStar(0)}
+                >
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`star-btn ${(hoverStar || myRating) >= value ? 'lit' : ''}`}
+                      aria-label={`${value} star${value > 1 ? 's' : ''}`}
+                      onMouseEnter={() => !ratingDone && setHoverStar(value)}
+                      onClick={() => handleRate(value)}
+                      disabled={ratingBusy || ratingDone}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <span className="rating-note">
+                  {ratingSummary
+                    ? `★ ${ratingSummary.average.toFixed(2)} · ${ratingSummary.count} ${ratingSummary.count === 1 ? 'RATING' : 'RATINGS'}`
+                    : 'NOT YET RATED — BE THE FIRST'}
+                </span>
+              </div>
+              {ratingDone && <p className="rating-thanks">LOGGED ★{myRating} — THANK YOU</p>}
+              {ratingError && <p className="form-error">COULDN'T LOG RATING: {ratingError}</p>}
+            </div>
 
             <div className="stockroom-strip">
               <span className="stockroom-tag">STOCKROOM</span>
@@ -209,8 +289,27 @@ export default function FragPage() {
               <span>{stockDate(frag.created_at)}</span>
             </div>
             <div className="receipt-row">
+              <span>LONGEVITY</span>
+              <span>{frag.longevity_hours != null ? `${frag.longevity_hours} HRS` : '—'}</span>
+            </div>
+            <div className="receipt-row">
               <span>NOTES</span>
               <span>{tags.length} LISTED</span>
+            </div>
+
+            <div className="receipt-rule" />
+
+            <div className="receipt-row">
+              <span>RATING</span>
+              <span>
+                {ratingSummary
+                  ? `★ ${ratingSummary.average.toFixed(2)} (${ratingSummary.count})`
+                  : 'NOT YET RATED'}
+              </span>
+            </div>
+            <div className="receipt-row">
+              <span>SHELFED BY</span>
+              <span>{(frag.shelfed_by?.trim() || 'THE SHOP').toUpperCase()}</span>
             </div>
 
             <div className="receipt-rule" />

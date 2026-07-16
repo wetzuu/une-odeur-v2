@@ -591,6 +591,36 @@ a.shelf-label:hover {
   color: var(--ink-faint);
 }
 
+.shelf-card-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px 10px;
+  flex-wrap: wrap;
+  border-top: 1px dashed var(--line);
+  margin-top: 8px;
+  padding-top: 7px;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+}
+
+.shelf-card-stars {
+  color: #b8892f;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shelf-card-unrated {
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.shelf-card-shelver {
+  color: var(--ink-faint);
+  text-align: right;
+}
+
 /* ── The Aisles (category page) ────────────────────────────── */
 
 .aisles-page {
@@ -801,6 +831,60 @@ a.shelf-label:hover {
   line-height: 1.85;
   color: var(--ink-soft);
   max-width: 62ch;
+}
+
+/* Rating "over the counter" */
+.counter-rating {
+  margin-top: 28px;
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.star-input {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  padding: 0 3px;
+  font-size: 1.65rem;
+  line-height: 1;
+  color: var(--line-strong);
+  transition: color 0.1s ease, transform 0.1s ease;
+}
+
+.star-btn.lit {
+  color: #b8892f;
+}
+
+.star-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.star-btn:disabled {
+  cursor: default;
+}
+
+.rating-note {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.rating-thanks {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--green-dark);
+  margin-top: 8px;
 }
 
 /* ── The receipt ───────────────────────────────────────────── */

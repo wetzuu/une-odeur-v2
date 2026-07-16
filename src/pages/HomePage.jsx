@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
 import ShelfSection from '../components/ShelfSection'
 import { getFragrances } from '../lib/fragranceService'
+import { getRatingSummaries } from '../lib/ratingService'
 import { SCENT_FAMILIES } from '../lib/catalog'
 
 const neighborhoodPicks = [
@@ -34,15 +35,20 @@ function normalizeSearchValue(value) {
 
 export default function HomePage({ searchTerm = '' }) {
   const [fragrances, setFragrances] = useState([])
+  const [ratings, setRatings] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     let isMounted = true
 
-    getFragrances()
-      .then((data) => {
-        if (isMounted) setFragrances(data)
+    // Ratings fail soft — the shelves still render without them.
+    Promise.all([getFragrances(), getRatingSummaries().catch(() => ({}))])
+      .then(([data, summaries]) => {
+        if (isMounted) {
+          setFragrances(data)
+          setRatings(summaries)
+        }
       })
       .catch((err) => {
         if (isMounted) setError(err.message)
@@ -97,7 +103,7 @@ export default function HomePage({ searchTerm = '' }) {
             {matches.length > 0 ? (
               <div className="shelf-grid">
                 {matches.map((frag) => (
-                  <PerfumeCard key={frag.id} frag={frag} />
+                  <PerfumeCard key={frag.id} frag={frag} rating={ratings[frag.id]} />
                 ))}
               </div>
             ) : (
@@ -111,7 +117,7 @@ export default function HomePage({ searchTerm = '' }) {
             <ShelfSection number={1} title="New Arrivals" note="FRESHLY STOCKED">
               <div className="shelf-grid">
                 {newArrivals.map((frag) => (
-                  <PerfumeCard key={frag.id} frag={frag} />
+                  <PerfumeCard key={frag.id} frag={frag} rating={ratings[frag.id]} />
                 ))}
               </div>
             </ShelfSection>
@@ -120,7 +126,7 @@ export default function HomePage({ searchTerm = '' }) {
               <ShelfSection number={2} title="On the Shelves" note="THE STANDING COLLECTION">
                 <div className="shelf-grid">
                   {restOfShelves.map((frag) => (
-                    <PerfumeCard key={frag.id} frag={frag} />
+                    <PerfumeCard key={frag.id} frag={frag} rating={ratings[frag.id]} />
                   ))}
                 </div>
               </ShelfSection>
