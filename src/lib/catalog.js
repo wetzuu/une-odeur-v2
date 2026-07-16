@@ -43,6 +43,17 @@ export function shelfLocation(tags = []) {
     : 'FRONT COUNTER'
 }
 
+// URL-safe id for newly stocked items, derived from the name.
+export function slugify(name) {
+  return (
+    String(name)
+      .toLowerCase()
+      .replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'item'
+  )
+}
+
 export function stockDate(createdAt) {
   if (!createdAt) return '—'
   return new Date(createdAt)

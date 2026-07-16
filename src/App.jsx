@@ -7,6 +7,7 @@ import FragPage from './pages/FragPage'
 import CategoryPage from './pages/CategoryPage'
 import AccountPage from './pages/AccountPage'
 import AboutPage from './pages/AboutPage'
+import StockFormPage from './pages/StockFormPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -22,6 +23,8 @@ export default function App() {
           <Route path="/frags/:id" element={<FragPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/stockroom/new" element={<StockFormPage />} />
+          <Route path="/stockroom/:id/edit" element={<StockFormPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

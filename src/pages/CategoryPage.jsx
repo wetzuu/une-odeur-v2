@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import PerfumeCard from '../components/PerfumeCard'
 import ShelfSection from '../components/ShelfSection'
 import { getFragrances } from '../lib/fragranceService'
@@ -138,6 +138,11 @@ export default function CategoryPage() {
 					) : (
 						<p className="print-note">THIS SHELF IS EMPTY — TRY ANOTHER COMBINATION</p>
 					)}
+
+					<Link to="/stockroom/new" className="stock-invite">
+						<span className="stock-invite-plus">+</span>
+						MISSING SOMETHING? STOCK A NEW ITEM IN THE STOCKROOM
+					</Link>
 				</>
 			)}
 		</div>

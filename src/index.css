@@ -1021,7 +1021,8 @@ a.shelf-label:hover {
   margin-bottom: 6px;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea {
   width: 100%;
   padding: 10px 12px;
   font-family: var(--font-sans);
@@ -1034,7 +1035,14 @@ a.shelf-label:hover {
   transition: border-color 0.15s ease;
 }
 
-.form-group input:focus {
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
   border-color: var(--green);
 }
 
@@ -1077,6 +1085,178 @@ a.shelf-label:hover {
   font-size: 0.74rem;
   color: var(--green-dark);
   margin-bottom: 10px;
+}
+
+/* ── Stockroom (intake forms & shelf management) ───────────── */
+
+.intake-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 5% 64px;
+}
+
+.intake-card {
+  background: var(--paper-bright);
+  background-image: var(--grain);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 2px 0 var(--shade);
+  padding: 30px 32px 36px;
+}
+
+.intake-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 500;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.intake-sub {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  border-bottom: 1px dashed var(--line-strong);
+  padding-bottom: 16px;
+  margin-bottom: 22px;
+}
+
+.intake-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 18px;
+}
+
+.form-label-text {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.family-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.field-error {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--stamp);
+  margin-top: 5px;
+}
+
+.intake-preview {
+  margin-top: 10px;
+  height: 150px;
+  border: 1px dashed var(--line-strong);
+  background: linear-gradient(180deg, var(--receipt), var(--shade));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.intake-preview img {
+  max-height: 126px;
+  width: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.intake-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.intake-actions .submit-btn {
+  flex: 1;
+  margin-top: 0;
+}
+
+.intake-actions .shelf-label {
+  align-self: stretch;
+}
+
+/* Edit/remove strip on the item page */
+.stockroom-strip {
+  margin-top: 30px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line-strong);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+}
+
+.stockroom-tag {
+  color: var(--ink-faint);
+}
+
+.stockroom-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--green-dark);
+  transition: opacity 0.15s ease;
+}
+
+.stockroom-link:hover {
+  text-decoration: underline;
+}
+
+.stockroom-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stockroom-link.danger {
+  color: var(--stamp);
+}
+
+/* "Stock a new item" invitation panel */
+.stock-invite {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  padding: 18px;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.stock-invite:hover {
+  color: var(--green-dark);
+  border-color: var(--green);
+  transform: translateY(-2px);
+}
+
+.stock-invite-plus {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  line-height: 1;
 }
 
 /* ── About page ────────────────────────────────────────────── */
@@ -1269,6 +1449,18 @@ a.shelf-label:hover {
 
   .member-card {
     padding: 24px 20px 28px;
+  }
+
+  .intake-card {
+    padding: 24px 20px 30px;
+  }
+
+  .intake-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .intake-actions {
+    flex-direction: column;
   }
 }
 

@@ -20,6 +20,9 @@ export default function Navbar({ searchTerm, onSearchChange }) {
           <NavLink to="/category" className={({ isActive }) => `shop-nav-link ${isActive ? 'active' : ''}`}>
             The Aisles
           </NavLink>
+          <NavLink to="/stockroom/new" className={({ isActive }) => `shop-nav-link ${isActive ? 'active' : ''}`}>
+            Stockroom
+          </NavLink>
           <NavLink to="/about" className={({ isActive }) => `shop-nav-link ${isActive ? 'active' : ''}`}>
             About
           </NavLink>

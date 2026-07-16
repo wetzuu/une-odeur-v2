@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { getFragrance } from '../lib/fragranceService'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { getFragrance, deleteFragrance } from '../lib/fragranceService'
 import { inventoryNumber, shelfLocation, stockDate } from '../lib/catalog'
 
 // Fake-but-deterministic barcode: bar widths derived from the item id.
@@ -28,8 +28,12 @@ function Barcode({ id }) {
 
 export default function FragPage() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [frag, setFrag] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [confirmingRemove, setConfirmingRemove] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  const [removeError, setRemoveError] = useState(null)
 
   useEffect(() => {
     let isMounted = true
@@ -82,6 +86,19 @@ export default function FragPage() {
 
   const tags = frag.tags ?? []
 
+  // Open to all visitors for now — gate this strip once auth/ownership lands.
+  async function handleRemove() {
+    setRemoving(true)
+    setRemoveError(null)
+    try {
+      await deleteFragrance(frag.id)
+      navigate('/')
+    } catch (error) {
+      setRemoveError(error.message)
+      setRemoving(false)
+    }
+  }
+
   return (
     <div className="item-page">
       <Link to="/" className="crumb">← BACK TO THE SHELVES</Link>
@@ -108,6 +125,41 @@ export default function FragPage() {
 
             <h2 className="counter-note-label">from the counter —</h2>
             <p className="item-description">{frag.description}</p>
+
+            <div className="stockroom-strip">
+              <span className="stockroom-tag">STOCKROOM</span>
+              <Link to={`/stockroom/${frag.id}/edit`} className="stockroom-link">✎ EDIT ITEM</Link>
+              {confirmingRemove ? (
+                <>
+                  <span className="stockroom-tag">TAKE IT OFF THE SHELF?</span>
+                  <button
+                    type="button"
+                    className="stockroom-link danger"
+                    onClick={handleRemove}
+                    disabled={removing}
+                  >
+                    {removing ? 'REMOVING…' : 'YES, REMOVE'}
+                  </button>
+                  <button
+                    type="button"
+                    className="stockroom-link"
+                    onClick={() => setConfirmingRemove(false)}
+                    disabled={removing}
+                  >
+                    KEEP IT
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="stockroom-link danger"
+                  onClick={() => setConfirmingRemove(true)}
+                >
+                  ✕ REMOVE FROM SHELF
+                </button>
+              )}
+            </div>
+            {removeError && <p className="form-error">COULDN'T REMOVE: {removeError}</p>}
           </div>
         </div>
 
