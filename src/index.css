@@ -1367,6 +1367,54 @@ a.shelf-label:hover {
   margin-bottom: 14px;
 }
 
+.contact-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.contact-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--paper-bright);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--ink);
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.contact-button:hover {
+  transform: translateY(-2px);
+  border-color: var(--green);
+  color: var(--green-dark);
+}
+
+.contact-button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.contact-copy-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
 .about-steps {
   display: grid;
   gap: 0;

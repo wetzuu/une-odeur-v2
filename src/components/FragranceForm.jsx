@@ -66,14 +66,14 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
     const nextErrors = {}
     if (!name.trim()) nextErrors.name = 'Every bottle needs a name.'
     if (!brand.trim()) nextErrors.brand = 'Every bottle comes from somewhere.'
-    if (!image.trim()) nextErrors.image = 'Add an image URL, or a /images/… path.'
+    if (!image.trim()) nextErrors.image = 'Add an image URL.'
     if (!description.trim()) nextErrors.description = 'Write a note from the counter.'
     if (tags.length === 0) nextErrors.tags = 'Pick at least one scent family, or list an accord.'
     if (
       longevityValue != null &&
-      (!Number.isInteger(longevityValue) || longevityValue < 1 || longevityValue > 72)
+      (!Number.isInteger(longevityValue) || longevityValue < 1 || longevityValue > 24)
     ) {
-      nextErrors.longevity = 'Hours on skin should be a whole number from 1 to 72.'
+      nextErrors.longevity = 'Hours on skin should be a whole number from 1 to 24.'
     }
 
     setErrors(nextErrors)
@@ -100,7 +100,7 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
           <input
             id="intake-name"
             type="text"
-            placeholder="e.g. Bleu de Chanel"
+            placeholder="e.g. Ombre Nomade"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -112,7 +112,7 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
           <input
             id="intake-brand"
             type="text"
-            placeholder="e.g. Chanel"
+            placeholder="e.g. Louis Vuitton"
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
           />
@@ -125,7 +125,7 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
         <input
           id="intake-image"
           type="text"
-          placeholder="https://… or /images/bottle.png"
+          placeholder="https://…"
           value={image}
           onChange={(e) => setImage(e.target.value)}
         />
@@ -164,7 +164,7 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
           <input
             id="intake-accords"
             type="text"
-            placeholder="Comma-separated — e.g. Aromatic, Smoky, Vanilla"
+            placeholder="e.g. Aromatic, Smoky, Vanilla"
             value={extraAccords}
             onChange={(e) => setExtraAccords(e.target.value)}
           />
@@ -190,7 +190,7 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
         <label htmlFor="intake-description">Note from the counter</label>
         <textarea
           id="intake-description"
-          placeholder="What does it smell like? When would you wear it? Be honest — this goes on the receipt."
+          placeholder="What does it smell like? When would you wear it? Be honest! this goes on the receipt."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -203,7 +203,7 @@ export default function FragranceForm({ initial, submitLabel, busy, serverError,
           id="intake-shelfed-by"
           type="text"
           maxLength={40}
-          placeholder="Sign the form — optional"
+          placeholder="Sign the form; completely optional"
           value={shelfedBy}
           onChange={(e) => setShelfedBy(e.target.value)}
         />
