@@ -15,7 +15,10 @@ export default function PerfumeCard({ frag, rating }) {
         <p className="shelf-card-name">{frag.name}</p>
         <div className="shelf-card-meta">
           <span className="shelf-card-family">{aisle.label}</span>
-          <span className="shelf-card-no">Nº {inventoryNumber(frag.id)}</span>
+          <span className="shelf-card-no">
+            Nº {inventoryNumber(frag.id)}
+            {frag.longevity_hours != null && ` · ${frag.longevity_hours}H`}
+          </span>
         </div>
         <div className="shelf-card-foot">
           {rating ? (

@@ -14,6 +14,7 @@ export default function CategoryPage() {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState(null)
 	const [activeBrand, setActiveBrand] = useState('All brands')
+	const [sortBy, setSortBy] = useState('newest')
 	const [searchParams, setSearchParams] = useSearchParams()
 
 	const familyParam = searchParams.get('family')
@@ -52,7 +53,7 @@ export default function CategoryPage() {
 	)
 
 	const visibleFragrances = useMemo(() => {
-		return fragrances.filter((frag) => {
+		const filtered = fragrances.filter((frag) => {
 			const matchesCategory =
 				activeCategory === 'All' ||
 				(frag.tags ?? []).some((tag) => tag.toLowerCase() === activeCategory.toLowerCase())
@@ -61,7 +62,17 @@ export default function CategoryPage() {
 
 			return matchesCategory && matchesBrand
 		})
-	}, [fragrances, activeCategory, activeBrand])
+
+		// 'newest' keeps the service's created_at ordering. Untested
+		// longevity (null) always sinks to the bottom.
+		if (sortBy === 'longevity-desc') {
+			filtered.sort((a, b) => (b.longevity_hours ?? -1) - (a.longevity_hours ?? -1))
+		} else if (sortBy === 'longevity-asc') {
+			filtered.sort((a, b) => (a.longevity_hours ?? Infinity) - (b.longevity_hours ?? Infinity))
+		}
+
+		return filtered
+	}, [fragrances, activeCategory, activeBrand, sortBy])
 
 	// Each brand gets its own run of shelving, like walking a stocked aisle.
 	const brandShelves = useMemo(() => {
@@ -100,16 +111,27 @@ export default function CategoryPage() {
 						))}
 					</div>
 
-					<label className="brand-select-wrap">
-						<span>Brand shelf</span>
-						<select value={activeBrand} onChange={(event) => setActiveBrand(event.target.value)}>
-							{brandOptions.map((brand) => (
-								<option key={brand} value={brand}>
-									{brand}
-								</option>
-							))}
-						</select>
-					</label>
+					<div className="select-row">
+						<label className="brand-select-wrap">
+							<span>Brand shelf</span>
+							<select value={activeBrand} onChange={(event) => setActiveBrand(event.target.value)}>
+								{brandOptions.map((brand) => (
+									<option key={brand} value={brand}>
+										{brand}
+									</option>
+								))}
+							</select>
+						</label>
+
+						<label className="brand-select-wrap">
+							<span>Sort the shelf</span>
+							<select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+								<option value="newest">Newest first</option>
+								<option value="longevity-desc">Longevity — longest first</option>
+								<option value="longevity-asc">Longevity — shortest first</option>
+							</select>
+						</label>
+					</div>
 				</div>
 			</section>
 
@@ -126,7 +148,18 @@ export default function CategoryPage() {
 						{activeBrand !== 'All brands' && ` · BRAND: ${activeBrand.toUpperCase()}`}
 					</p>
 
-					{brandShelves.length > 0 ? (
+					{visibleFragrances.length > 0 && sortBy !== 'newest' ? (
+						<ShelfSection
+							title="Sorted by longevity"
+							note={sortBy === 'longevity-desc' ? 'LONGEST WEAR FIRST' : 'SHORTEST WEAR FIRST'}
+						>
+							<div className="shelf-grid">
+								{visibleFragrances.map((frag) => (
+									<PerfumeCard key={frag.id} frag={frag} rating={ratings[frag.id]} />
+								))}
+							</div>
+						</ShelfSection>
+					) : brandShelves.length > 0 ? (
 						brandShelves.map(([brand, frags]) => (
 							<div key={brand} className="brand-shelf">
 								<ShelfSection

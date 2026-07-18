@@ -296,17 +296,21 @@ a.shelf-label:hover {
   border: 1px dashed var(--line-strong);
   border-radius: 2px;
   padding: 8px 12px;
-  width: 200px;
+  width: 190px;
   outline: none;
-  transition: width 0.25s ease, border-color 0.15s ease;
+  transition: width 0.25s ease, margin-left 0.25s ease, border-color 0.15s ease;
 }
 
 .shop-search input::placeholder {
   color: var(--ink-faint);
 }
 
+/* Expands leftward without reflowing the header: the extra width is
+   cancelled by an equal negative margin, so the layout footprint
+   stays a constant 190px. */
 .shop-search input:focus {
-  width: 240px;
+  width: 250px;
+  margin-left: -60px;
   border-color: var(--green);
   border-style: solid;
 }
@@ -674,10 +678,18 @@ a.shelf-label:hover {
   gap: 9px;
 }
 
+.select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
 .brand-select-wrap {
   display: grid;
   gap: 6px;
-  max-width: 300px;
+  align-content: start;
+  width: 240px;
+  max-width: 100%;
   font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.12em;
@@ -1559,6 +1571,7 @@ a.shelf-label:hover {
   .shop-search input,
   .shop-search input:focus {
     width: 100%;
+    margin-left: 0;
   }
 
   .shop-search {

@@ -10,7 +10,7 @@ export default function Navbar({ searchTerm, onSearchChange }) {
       <div className="shop-header-inner">
         <Link to="/" className="shop-sign">
           <span className="shop-sign-name">une ’odeur</span>
-          <span className="shop-sign-sub">/ɔdœʀ/ · neighborhood fragrance archive</span>
+          <span className="shop-sign-sub">/ɔdœʀ/</span>
         </Link>
 
         <nav className="shop-nav" aria-label="Primary">
